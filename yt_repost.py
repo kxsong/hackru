@@ -4,6 +4,7 @@ import json
 from os import path
 from time import sleep
 from sys import argv, exit
+from string import find
 
 botheaders = {'User-agent': 'youtube repost finder by kxsong'}
 last_id = ''
@@ -66,7 +67,7 @@ def scrape(subreddit, start=None):
 		for submission in j['data']['children']:
 			data = submission['data']
 			if data['created_utc'] > last_time:
-				print 'New most recent: ' + data['id'] + data['title'] + ' at ' + str(data['created_utc'])
+				print 'New most recent: ' + data['id'] + ' ' + data['title'] + ' at ' + str(data['created_utc'])
 				last_time = data['created_utc']
 				last_id = 't3_' + data['id']
 			if data['domain'] == 'youtu.be' or data['domain'] == 'youtube.com':
@@ -102,7 +103,16 @@ def postcomment(text, parent):
 	global modhash, cookies, botheaders
 	payload = {'text': text, 'parent': parent, 'uh': modhash}
 	#print payload
-	r = requests.post('http://www.reddit.com/api/comment', data=payload, headers=botheaders, cookies=cookies)
+	success = False
+	while not success:
+		r = requests.post('http://www.reddit.com/api/comment', data=payload, headers=botheaders, cookies=cookies)
+		ratelimited = find(r.text, 'try again in ')
+		if ratelimited > 0:
+			print "rate limited, sleeping"
+			#sleeping only makes sense if this bot is running on a single subreddit
+				sleep(30)
+		else:
+			success = True
 	#print r.text
 	sleep(2)	
 	
