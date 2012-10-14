@@ -1,5 +1,5 @@
 About:
-A bot that detects certain types of Youtube reposts.
+A Reddit bot that detects certain types of Youtube reposts in a given subreddit.
 
 Reddit has a rudimentary method of detecting duplicate submissions. It takes the submission URL, then strips the leading "www" and any anchor ("index.html#anchor") at the end. For some web content, this system works well. However, there is more than one URL that can reach a Youtube video. The following links will show the same video:
 
@@ -9,7 +9,7 @@ http://www.youtube.com/watch?v=uRGljemfwUE&feature=youtu.be (what the shortened 
 http://www.youtube.com/watch?v=uRGljemfwUE&list=FLrzKKs_p0amTiGyFvNYxIrw&index=54&feature=plpp_video (a link from a playlist)
 http://www.youtube.com/watch?v=uRGljemfwUE&foo=bar&bar=foo&abc=123 (any extra key/value pairs) 
 
-yt_repost will detect youtube submissions of any form, and look for duplicates of the first three forms.
+yt_repost will detect youtube submissions of any form, and look for duplicates of the first three forms. It then posts a comment listing the duplicates.
 
 Usage: python yt_repost.py subreddit [last_ID]
 	create a username/password file at ~/username.txt. It should have two lines: the first being the screenname, the second being the password
