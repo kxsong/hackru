@@ -1,5 +1,10 @@
-Uses requests: http://pypi.python.org/pypi/requests
+Usage: python yt_repost.py subreddit [last_ID]
+requires a username/password file at ~/username.txt. It should have two lines: the first being the screenname, the second being the password
 
-improvements: use reddit api wrapper: https://github.com/mellort/reddit_api
+Requires Python requests: http://pypi.python.org/pypi/requests
 
-compatible with python 2.6
+ideas for improvements: 
+use reddit api wrapper: https://github.com/mellort/reddit_api
+a more secure way of storing username+password
+
+compatible with python 2.6.6

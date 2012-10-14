@@ -12,9 +12,14 @@ modhash = ""
 cookies = {}
 
 def main():
-	login()
-	scrape(argv[1]);
-
+	if len(argv) >= 3:
+		login()
+		scrape(argv[1], argv[2])
+	elif len(argv) == 2:
+		login()
+		scrape(argv[1])
+	else:
+		print "Usage: python yt_repost.py subreddit [last_ID]"
 def login():
 	global modhash, cookies, botheaders
 	f = open(path.expanduser('~/username.txt'))
@@ -35,8 +40,17 @@ def login():
 			print "logged in"
 	sleep(2)
 
-def scrape(subreddit):
+def scrape(subreddit, start=None):
 	global last_id, last_time
+	if start:
+		r = requests.get('http://www.reddit.com/'+start+'/.json')
+		try:
+			j = json.loads(r.text)
+			last_id = 't3_' + start
+			last_time = j[0]['data']['children'][0]['data']['created_utc']
+		except:
+			print "unable to get submission data for http://reddit.com/"+start+"/"
+			exit(1)
 	while True:
 		r = requests.get('http://www.reddit.com/r/'+subreddit+'/new/.json?sort=new&before='+last_id)
 		#print "searching with before=" + last_id
