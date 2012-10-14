@@ -77,25 +77,25 @@ def scrape(subreddit, start=None):
 				reposts = getreposts(data['url'], subreddit, reddit_id)
 				if not reposts:
 					continue
-				comment = makecomment(reposts, data)
+				comment = makecomment(reposts, data, subreddit)
 				#print comment
 				postcomment(comment, 't3_'+data['id'])
 		sleep(30)
 		
-def makecomment(reposts, original):
+def makecomment(reposts, original, subreddit):
 	tablebody = u''
 	for data in reposts:
 		tablebody += '|[' + data['title'] + '](' + 'http://reddit.com' + \
 		data['permalink'] + ')|'+data['url']+'|+'+ str(data['ups']) + ' -' + str(data['downs'])+ \
 		'|' + str(data['num_comments']) + '|\n'
 	comment = \
-u'''{0} possible duplicate submissions found in this subreddit:
+u'''This bot found {0} duplicate submissions in /r/{1} that Reddit may not have detected while submitting:
 
 |Title|URL|votes|comments|
 |-|-|-|-|
-{1}
-[^about ^this ^bot](https://github.com/kxsong/hackru/wiki/About) ^| [^send ^feedback](http://www.reddit.com/message/compose/?to=kxsong&subject=Bot%20feedback&message=%5Bcontext%5D%28{2}%29)'''\
-	.format(len(reposts), tablebody, 'http://reddit.com' + original['permalink'])
+{2}
+[^about ^this ^bot](https://github.com/kxsong/hackru/wiki/About) ^| [^send ^feedback](http://www.reddit.com/message/compose/?to=kxsong&subject=Bot%20feedback&message=%5Bcontext%5D%28{3}%29)'''\
+	.format(len(reposts), subreddit, tablebody, 'http://reddit.com' + original['permalink'])
 	print 'found ' + str(len(reposts)) + ' reposts'
 	return comment	
 
@@ -131,19 +131,31 @@ def getreposts(url, subreddit=None, reddit_id=None, utc=0):
 	if not v_id:
 		return
 	print 'looking for duplicates with id : ' + v_id
-	result = []
+	results = []
+	merge = True
 	base_urls = ['http://www.reddit.com/api/info.json?url=youtube.com/watch?v=' + v_id, \
 	'http://www.reddit.com/api/info.json?url=youtu.be/' + v_id, \
-	'http://www.reddit.com/api/info.json?url=youtube.com/watch?v=' + v_id + '%26feature=youtu.be']
-	for url in base_urls:
-		r = requests.get(url, headers=botheaders)
+	'http://www.reddit.com/api/info.json?url=youtube.com/watch?v=' + v_id + '%26feature=youtu.be', \
+	'http://www.reddit.com/api/info.json?url=youtube.com/watch?feature=player_embedded%26v=' + v_id]
+	#feature after: related|plcp|relmfu, youtu.be, g-all-u, endscreen, share, youtube_gdata_player, fvwrel
+	#feature before: player_embedded, player_detailpage
+	#sns=fb
+	for base_url in base_urls:
+		subresults = []
+		merge = True
+		r = requests.get(base_url, headers=botheaders)
 		j = json.loads(r.text)
 		for submission in j['data']['children']:
 			data = submission['data']
-			if (not subreddit or data['subreddit'] == subreddit) and data['name'] != reddit_id:
-				result.append(data)
+			if data['name'] == reddit_id:
+				merge = False #if reddit can detect these duplicates, no need to retell
+			if (not subreddit or data['subreddit'] == subreddit):
+				subresults.append(data)				
+		if merge:
+			for result in subresults:
+				results.append(result)
 		sleep(2)
-	return result
+	return results
 
 if __name__ == '__main__':
     main()

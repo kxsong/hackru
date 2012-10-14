@@ -23,5 +23,6 @@ ideas for improvements:
 	use http://www.reddit.com/domain/youtube.com/new/ and http://www.reddit.com/domain/youtu.be/new/
 		This is more comprehensive, but not all moderators may want the bot on their subreddit. Also, subreddits that the bot is not a moderator of may rate-limit the bot's comments until it gets more upvotes.
 	show timestamps of duplicate posts
+	keep statistics on the frequency of different kinds of youtube URLs 
 	
 compatible with python 2.6.6
