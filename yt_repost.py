@@ -66,7 +66,7 @@ def scrape(subreddit, start=None):
 		for submission in j['data']['children']:
 			data = submission['data']
 			if data['created_utc'] > last_time:
-				print 'New most recent: ' + data['title'] + ' at ' + str(data['created_utc'])
+				print 'New most recent: ' + data['id'] + data['title'] + ' at ' + str(data['created_utc'])
 				last_time = data['created_utc']
 				last_id = 't3_' + data['id']
 			if data['domain'] == 'youtu.be' or data['domain'] == 'youtube.com':
@@ -85,12 +85,13 @@ def makecomment(reposts, original):
 	tablebody = ''
 	for data in reposts:
 		tablebody += '|[' + data['title'] + '](' + 'http://reddit.com' + \
-		data['permalink'] + ')|'+data['url']+'|\n'
+		data['permalink'] + ')|'+data['url']+'|+'+ str(data['ups']) + ' -' + str(data['downs'])+ \
+		'|' + str(data['num_comments']) + '|\n'
 	comment = \
 '''{0} possible duplicate submissions found in this subreddit:
 
-|Title|URL|
-|-|-|
+|Title|URL|votes|comments|
+|-|-|-|-|
 {1}
 [^about ^this ^bot](https://github.com/kxsong/hackru/wiki/About) ^| [^send ^feedback](http://www.reddit.com/message/compose/?to=kxsong&subject=Bot%20feedback&message=%5Bcontext%5D%28{2}%29)'''\
 	.format(len(reposts), tablebody, 'http://reddit.com' + original['permalink'])
