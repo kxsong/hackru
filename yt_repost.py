@@ -109,8 +109,8 @@ def postcomment(text, parent):
 		ratelimited = find(r.text, 'try again in ')
 		if ratelimited > 0:
 			print "rate limited, sleeping"
+			sleep(30)
 			#sleeping only makes sense if this bot is running on a single subreddit
-				sleep(30)
 		else:
 			success = True
 	#print r.text
