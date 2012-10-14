@@ -6,9 +6,9 @@ from time import sleep
 from sys import argv, exit
 
 botheaders = {'User-agent': 'youtube repost finder by kxsong'}
-last_id = ""
+last_id = ''
 last_time = 0
-modhash = ""
+modhash = ''
 cookies = {}
 
 def main():
@@ -19,7 +19,8 @@ def main():
 		login()
 		scrape(argv[1])
 	else:
-		print "Usage: python yt_repost.py subreddit [last_ID]"
+		print 'Usage: python yt_repost.py subreddit [last_ID]'
+
 def login():
 	global modhash, cookies, botheaders
 	f = open(path.expanduser('~/username.txt'))
@@ -28,16 +29,16 @@ def login():
 	payload = {'api_type': 'json', 'user': user, 'passwd': password}
 	r = requests.post('http://www.reddit.com/api/login/' + user, data=payload, headers=botheaders)
 	if r.status_code != 200:
-		print "error logging in: HTTP code " + r.status_code
+		print 'error logging in: HTTP code ' + r.status_code
 	else:
 		j = json.loads(r.text)
 		print j
-		if len(j["json"]["errors"]) > 0:
-			print "error logging in:"
+		if len(j['json']['errors']) > 0:
+			print 'error logging in:'
 		else:
 			modhash = j['json']['data']['modhash']
 			cookies = r.cookies
-			print "logged in"
+			print 'logged in'
 	sleep(2)
 
 def scrape(subreddit, start=None):
@@ -49,29 +50,29 @@ def scrape(subreddit, start=None):
 			last_id = 't3_' + start
 			last_time = j[0]['data']['children'][0]['data']['created_utc']
 		except:
-			print "unable to get submission data for http://reddit.com/"+start+"/"
+			print 'unable to get submission data for http://reddit.com/'+start+'/'
 			exit(1)
 	while True:
 		r = requests.get('http://www.reddit.com/r/'+subreddit+'/new/.json?sort=new&before='+last_id)
-		#print "searching with before=" + last_id
+		#print 'searching with before=' + last_id
 		try:
 			j = json.loads(r.text)
 		except:
-			print "unable to get subreddit data for /r/"+subreddit+"/. Does the subreddit exist? If it is"+\
-			"a private subreddit, does the bot have access to it?"
+			print 'unable to get subreddit data for /r/'+subreddit+'/. Does the subreddit exist? If it is'+\
+			'a private subreddit, does the bot have access to it?'
 			exit(1)
-		print "searching through " + str(len(j['data']['children'])) + " submissions"
+		print 'searching through ' + str(len(j['data']['children'])) + ' submissions'
 		sleep(2)
 		for submission in j['data']['children']:
 			data = submission['data']
 			if data['created_utc'] > last_time:
-				print "New most recent: " + data['title'] + " at " + str(data['created_utc'])
+				print 'New most recent: ' + data['title'] + ' at ' + str(data['created_utc'])
 				last_time = data['created_utc']
 				last_id = 't3_' + data['id']
-			if data['domain'] == "youtu.be" or data['domain'] == "youtube.com":
+			if data['domain'] == 'youtu.be' or data['domain'] == 'youtube.com':
 				v_id = getv_id(data['url'])
 				reddit_id = data['name']
-				print data['name'] + ": " + data['title'] + ": " + v_id
+				print data['name'] + ': ' + data['title'] + ': ' + v_id
 				reposts = getreposts(data['url'], subreddit, reddit_id)
 				if not reposts:
 					continue
@@ -81,19 +82,19 @@ def scrape(subreddit, start=None):
 		sleep(30)
 		
 def makecomment(reposts, original):
-	tablebody = ""
+	tablebody = ''
 	for data in reposts:
-		tablebody += "|/r/" + data['subreddit'] + '|[' + data['title'] + '](' + 'http://reddit.com' + \
+		tablebody += '|[' + data['title'] + '](' + 'http://reddit.com' + \
 		data['permalink'] + ')|'+data['url']+'|\n'
 	comment = \
-"""{0} duplicate youtube submissions in this subreddit:
+'''{0} possible duplicate submissions found in this subreddit:
 
-|Subreddit|Title|URL|
-|-|-|-|
+|Title|URL|
+|-|-|
 {1}
-[^about ^this ^bot](https://github.com/kxsong/hackru/wiki/About) ^| [^send ^feedback](http://www.reddit.com/message/compose/?to=kxsong&subject=Bot%20feedback&message=%5Bcontext%5D%28{2}%29)"""\
-	.format(len(reposts), tablebody, "http://reddit.com" + original['permalink'])
-	print "found " + str(len(reposts)) + " reposts"
+[^about ^this ^bot](https://github.com/kxsong/hackru/wiki/About) ^| [^send ^feedback](http://www.reddit.com/message/compose/?to=kxsong&subject=Bot%20feedback&message=%5Bcontext%5D%28{2}%29)'''\
+	.format(len(reposts), tablebody, 'http://reddit.com' + original['permalink'])
+	print 'found ' + str(len(reposts)) + ' reposts'
 	return comment	
 
 def postcomment(text, parent):
@@ -118,19 +119,20 @@ def getreposts(url, subreddit=None, reddit_id=None, utc=0):
 	v_id = getv_id(url)
 	if not v_id:
 		return
-	print "looking for duplicates with id : " + v_id
+	print 'looking for duplicates with id : ' + v_id
 	result = []
-	base_urls = ["http://www.reddit.com/api/info.json?url=youtube.com/watch?v=" + v_id, \
-	"http://www.reddit.com/api/info.json?url=youtu.be/" + v_id]
+	base_urls = ['http://www.reddit.com/api/info.json?url=youtube.com/watch?v=' + v_id, \
+	'http://www.reddit.com/api/info.json?url=youtu.be/' + v_id, \
+	'http://www.reddit.com/api/info.json?url=youtube.com/watch?v=' + v_id + '%26feature=youtu.be']
 	for url in base_urls:
 		r = requests.get(url, headers=botheaders)
 		j = json.loads(r.text)
-		for submission in j["data"]["children"]:
-			data = submission["data"]
-			if (not subreddit or data["subreddit"] == subreddit) and data['name'] != reddit_id:
+		for submission in j['data']['children']:
+			data = submission['data']
+			if (not subreddit or data['subreddit'] == subreddit) and data['name'] != reddit_id:
 				result.append(data)
 		sleep(2)
 	return result
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     main()
