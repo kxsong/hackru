@@ -82,13 +82,13 @@ def scrape(subreddit, start=None):
 		sleep(30)
 		
 def makecomment(reposts, original):
-	tablebody = ''
+	tablebody = u''
 	for data in reposts:
 		tablebody += '|[' + data['title'] + '](' + 'http://reddit.com' + \
 		data['permalink'] + ')|'+data['url']+'|+'+ str(data['ups']) + ' -' + str(data['downs'])+ \
 		'|' + str(data['num_comments']) + '|\n'
 	comment = \
-'''{0} possible duplicate submissions found in this subreddit:
+u'''{0} possible duplicate submissions found in this subreddit:
 
 |Title|URL|votes|comments|
 |-|-|-|-|
